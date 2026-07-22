@@ -1,0 +1,26 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // Áudios/vídeos publicados no painel admin (biblioteca de conteúdo).
+    // Qualquer pessoa no app pode ouvir/assistir; só o admin pode enviar/apagar.
+    match /media-audio/{fileName} {
+      allow read: if true;
+      allow write: if request.auth != null
+                   && request.auth.uid == 'COLOQUE_AQUI_O_UID_DO_ADMIN';
+    }
+
+    // Sons de alarme publicados no painel admin.
+    match /alarm-sounds/{fileName} {
+      allow read: if true;
+      allow write: if request.auth != null
+                   && request.auth.uid == 'COLOQUE_AQUI_O_UID_DO_ADMIN';
+    }
+
+    // Qualquer outro caminho: fechado por padrão.
+    match /{allPaths=**} {
+      allow read: if false;
+      allow write: if false;
+    }
+  }
+}
