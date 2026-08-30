@@ -543,6 +543,49 @@
 
   .comment-mod-actions { display: flex; gap: 8px; }
 
+  /* ── ABA ERROS REPORTADOS ── */
+  .tab-badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 16px; height: 16px; padding: 0 4px; margin-left: 5px;
+    border-radius: 20px; background: var(--danger); color: #fff;
+    font-size: 9px; font-weight: bold; vertical-align: middle;
+  }
+
+  .report-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--hot);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    margin-bottom: 10px;
+  }
+  .report-card.resolvido { border-left-color: var(--green); opacity: 0.65; }
+
+  .report-card-head {
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+    margin-bottom: 8px;
+  }
+  .report-status-pill {
+    font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 2px 8px; border-radius: 20px; font-weight: bold;
+    border: 1px solid var(--hot); color: var(--hot);
+  }
+  .report-card.resolvido .report-status-pill { border-color: var(--green); color: var(--green); }
+  .report-card-time { font-size: 10px; color: var(--dim); margin-left: auto; }
+
+  .report-noticia {
+    font-size: 10px; color: var(--accent); letter-spacing: 0.05em;
+    margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px dashed var(--border);
+  }
+  .report-descricao { font-size: 13px; color: var(--text); margin-bottom: 10px; line-height: 1.5; }
+  .report-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  .btn-resolver {
+    background: transparent; border: 1px solid var(--green); color: var(--green);
+    font-family: var(--mono); font-size: 10px; padding: 4px 9px;
+    border-radius: var(--radius); cursor: pointer; transition: all 0.15s;
+  }
+  .btn-resolver:hover { background: var(--green); color: #fff; }
+
   .maintenance-box {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -774,6 +817,7 @@ function andalaLogout(){ firebase.auth().signOut().then(function(){ window.locat
   <div class="tabs">
     <button class="tab-btn active" onclick="trocarTab('noticias', this)">📰 Notícias</button>
     <button class="tab-btn" onclick="trocarTab('comentarios', this)">💬 Comentários</button>
+    <button class="tab-btn" id="tab-btn-reports" onclick="trocarTab('reports', this)">🚩 Erros <span id="badge-reports" class="tab-badge" style="display:none;">0</span></button>
     <button class="tab-btn" onclick="trocarTab('estatisticas', this)">📊 Estatísticas</button>
     <button class="tab-btn" onclick="trocarTab('manutencao', this)">🛠️ Manutenção</button>
   </div>
@@ -959,6 +1003,28 @@ function andalaLogout(){ firebase.auth().signOut().then(function(){ window.locat
     </div>
 
     <div id="lista-comentarios"></div>
+  </div>
+
+  <!-- ABA ERROS REPORTADOS (NOVO) -->
+  <div class="tab-panel" id="panel-reports">
+    <div class="list-header">
+      <div class="list-header-left">
+        <h2>// erros reportados pelos leitores</h2>
+        <span id="count-reports">0</span>
+      </div>
+      <button class="btn-clear-all" onclick="recarregarReports()">↻ Atualizar</button>
+    </div>
+
+    <div class="field" style="margin-bottom:16px;">
+      <label for="filtro-reports-status">Mostrar</label>
+      <select id="filtro-reports-status" onchange="renderizarReports()">
+        <option value="pendentes">Só pendentes</option>
+        <option value="todos">Todos (incl. resolvidos)</option>
+        <option value="resolvidos">Só resolvidos</option>
+      </select>
+    </div>
+
+    <div id="lista-reports"></div>
   </div>
 
   <!-- ABA ESTATÍSTICAS (NOVO) -->
@@ -1381,6 +1447,7 @@ function trocarTab(nome, btn) {
   if (nome === 'comentarios') {
     recarregarComentarios();
   }
+  if (nome === 'reports') recarregarReports();
   if (nome === 'manutencao')  { atualizarStatusManutencao(); renderizarLog(); }
   if (nome === 'estatisticas') calcularEstatisticas();
 }
@@ -2043,6 +2110,118 @@ document.addEventListener('click', function (e) {
   compartilhar(btn.dataset.rede, btn.dataset.link || '', btn.dataset.titulo || '');
 });
 
+// ── ERROS REPORTADOS (leitores do SEEM) ──────────────
+const REPORTS_URL = 'https://seem-new2-default-rtdb.firebaseio.com/reports';
+let cacheReports = {}; // { key: {noticiaTs, titulo, descricao, ts, resolvido} }
+
+async function buscarTodosReports() {
+  try {
+    const r = await fetch(`${REPORTS_URL}.json`);
+    const d = await r.json();
+    return d || {};
+  } catch (e) { return {}; }
+}
+
+async function recarregarReports() {
+  document.getElementById('lista-reports').innerHTML = '<div id="empty-comments">Carregando…</div>';
+  cacheReports = await buscarTodosReports();
+  renderizarReports();
+  atualizarBadgeReports();
+}
+
+function renderizarReports() {
+  const wrap = document.getElementById('lista-reports');
+  if (!wrap) return;
+  const filtro = document.getElementById('filtro-reports-status')?.value || 'pendentes';
+
+  const entradas = Object.entries(cacheReports)
+    .filter(([, r]) => r)
+    .sort((a, b) => (b[1].ts || 0) - (a[1].ts || 0))
+    .filter(([, r]) => {
+      if (filtro === 'pendentes')  return !r.resolvido;
+      if (filtro === 'resolvidos') return !!r.resolvido;
+      return true;
+    });
+
+  document.getElementById('count-reports').textContent = entradas.length;
+
+  wrap.innerHTML = entradas.length
+    ? entradas.map(([key, r]) => {
+        const noticia = r.noticiaTs ? cacheNoticias.find(n => String(n.ts) === String(r.noticiaTs)) : null;
+        const tituloNoticia = r.noticiaTs
+          ? (noticia ? noticia.titulo : `Notícia #${r.noticiaTs} (pode já ter sido apagada)`)
+          : 'Reportado no rodapé (fora de uma notícia)';
+        return `
+          <div class="report-card ${r.resolvido ? 'resolvido' : ''}">
+            <div class="report-card-head">
+              <span class="report-status-pill">${r.resolvido ? '✓ Resolvido' : '● Pendente'}</span>
+              <span class="report-card-time">${fmtData(r.ts)}</span>
+            </div>
+            <div class="report-noticia">📰 ${escHtml(tituloNoticia)}</div>
+            <div class="report-descricao">${r.descricao
+              ? escHtml(r.descricao)
+              : '<span style="color:var(--dim)">(o leitor não escreveu descrição)</span>'}</div>
+            <div class="report-actions">
+              ${r.resolvido
+                ? `<button class="btn-delete" onclick="reabrirReport('${key}')">↺ Reabrir</button>`
+                : `<button class="btn-resolver" onclick="resolverReport('${key}')">✓ Marcar como resolvido</button>`}
+              <button class="btn-delete" onclick="apagarReport('${key}')">Apagar</button>
+            </div>
+          </div>`;
+      }).join('')
+    : '<div id="empty-comments">Nenhum erro reportado por aqui.</div>';
+}
+
+async function resolverReport(key) {
+  try {
+    await fetch(`${REPORTS_URL}/${key}.json`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ resolvido: true, resolvidoEm: Date.now() })
+    });
+    if (cacheReports[key]) { cacheReports[key].resolvido = true; cacheReports[key].resolvidoEm = Date.now(); }
+    renderizarReports();
+    atualizarBadgeReports();
+    mostrarToast('Marcado como resolvido.');
+  } catch (e) { mostrarToast('Não foi possível atualizar agora.', true); }
+}
+
+async function reabrirReport(key) {
+  try {
+    await fetch(`${REPORTS_URL}/${key}.json`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ resolvido: false })
+    });
+    if (cacheReports[key]) cacheReports[key].resolvido = false;
+    renderizarReports();
+    atualizarBadgeReports();
+  } catch (e) { mostrarToast('Não foi possível atualizar agora.', true); }
+}
+
+async function apagarReport(key) {
+  if (!confirm('Apagar este relato de erro? Irreversível.')) return;
+  try {
+    await fetch(`${REPORTS_URL}/${key}.json`, { method: 'DELETE' });
+    delete cacheReports[key];
+    renderizarReports();
+    atualizarBadgeReports();
+    mostrarToast('Relato apagado.');
+  } catch (e) { mostrarToast('Não foi possível apagar agora.', true); }
+}
+
+// Contador no separador da aba — busca leve, só pra saber quantos estão
+// pendentes, sem precisar abrir a aba pra descobrir.
+async function atualizarBadgeReports() {
+  const todos = Object.keys(cacheReports).length ? cacheReports : await buscarTodosReports();
+  cacheReports = todos;
+  const pendentes = Object.values(todos).filter(r => r && !r.resolvido).length;
+  const badge = document.getElementById('badge-reports');
+  if (!badge) return;
+  if (pendentes > 0) { badge.textContent = pendentes; badge.style.display = 'inline-flex'; }
+  else badge.style.display = 'none';
+}
+
 // ── Conexão ─────────────────────────────────────────
 async function checarConexao() {
   try {
@@ -2064,6 +2243,7 @@ async function init() {
   cacheNoticias = limparExpiradas(normalizarCampos(remoto));
   renderizar();
   renderizarLog();
+  atualizarBadgeReports();
 
   setInterval(checarConexao, 30000);
 }
