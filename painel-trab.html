@@ -928,6 +928,14 @@ function andalaLogout(){ firebase.auth().signOut().then(function(){ window.locat
       </div>
 
       <div class="field">
+        <label for="f-audio">🎧 Áudio da notícia (link do YouTube) <span style="color:var(--muted)">(opcional)</span></label>
+        <input type="url" id="f-audio" placeholder="https://www.youtube.com/watch?v=… ou https://youtu.be/…" aria-label="Link do áudio da notícia no YouTube">
+        <small style="font-size:10px;margin-top:6px;display:block">
+          🎧 Cole aqui o link do vídeo (imagem + áudio narrado) publicado no YouTube. No site aparece um botão "Ouvir" separado do vídeo normal — pode preencher os dois campos ao mesmo tempo se quiser, ou só este.
+        </small>
+      </div>
+
+      <div class="field">
         <label>Imagem <span style="color:var(--muted)">(opcional)</span></label>
 
         <div class="img-option-tabs">
@@ -1506,6 +1514,8 @@ function renderizar() {
           ${n.setor ? `<span class="badge">${escHtml(n.setor)}</span>` : ''}
           ${catBadge}
           <span class="badge ${tempBadgeClass(n.temperatura)}">${tempLabel(n.temperatura)}</span>
+          ${n.video ? '<span class="badge" title="Tem vídeo anexado">🎬 vídeo</span>' : ''}
+          ${n.audio ? '<span class="badge" style="border-color:var(--accent);color:var(--accent)" title="Tem áudio anexado">🎧 áudio</span>' : ''}
           <span class="card-date">${fmtData(n.ts)}</span>
         </div>
         <div class="card-title">${escHtml(n.titulo)}</div>
@@ -1735,6 +1745,7 @@ function editarNoticia(ts) {
   document.getElementById('f-categoria').value = n.categoria || '';
   document.getElementById('f-autor').value     = n.autor     || 'Redação SEEM';
   document.getElementById('f-video').value     = n.video     || '';
+  document.getElementById('f-audio').value     = n.audio     || '';
 
   // [FIX 2] Temperatura agora salva como "temperatura"; suporte a campo legado "temp"
   const tempVal = n.temperatura || n.temp || '';
@@ -1796,6 +1807,7 @@ function cancelarEdicao() {
   document.getElementById('f-categoria').value = '';
   document.getElementById('f-autor').value     = 'Redação SEEM';
   document.getElementById('f-video').value     = '';
+  document.getElementById('f-audio').value     = '';
 
   const checked = document.querySelector('input[name="temp"]:checked');
   if (checked) checked.checked = false;
@@ -1814,6 +1826,7 @@ async function publicar() {
   const autor      = document.getElementById('f-autor').value;            // [FIX 2] era f-editor
   const temperatura = document.querySelector('input[name="temp"]:checked')?.value; // [FIX 2] era temp
   const video      = document.getElementById('f-video').value.trim();
+  const audio      = document.getElementById('f-audio').value.trim();
 
   const imagem  = opcaoImagemAtiva === 'galeria'
     ? imagemGaleriaBase64
@@ -1844,7 +1857,7 @@ async function publicar() {
     if (!noticia) { mostrarToast('Notícia não encontrada.', true); btn.disabled = false; btn.textContent = '▶ Publicar no TRAB'; return; }
 
     const dados = {
-      titulo, subtitulo, corpo, pais, setor, categoria, temperatura, autor, video,
+      titulo, subtitulo, corpo, pais, setor, categoria, temperatura, autor, video, audio,
       imagem: imagem || noticia.imagem
     };
 
@@ -1863,7 +1876,7 @@ async function publicar() {
     }
   } else {
     // NOVA — POST; Firebase devolve o push-key gerado
-    const nova = { titulo, subtitulo, corpo, pais, setor, categoria, temperatura, imagem, autor, video, ts: Date.now() };
+    const nova = { titulo, subtitulo, corpo, pais, setor, categoria, temperatura, imagem, autor, video, audio, ts: Date.now() };
     const fbKey = await criarRemoto(nova);
     ok = fbKey !== null;
     if (ok) {
