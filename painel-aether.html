@@ -886,6 +886,22 @@ function andalaLogout(){ firebase.auth().signOut().then(function(){ window.locat
       </div>
 
       <div class="field">
+        <label for="f-video">🎬 Vídeo do YouTube <span style="color:var(--muted)">(opcional)</span></label>
+        <input type="url" id="f-video" placeholder="https://www.youtube.com/watch?v=… ou https://youtu.be/…" aria-label="Link do vídeo do YouTube">
+        <small style="font-size:10px;margin-top:6px;display:block">
+          🎬 Cole o link do vídeo publicado no YouTube (ex: demonstração do produto). Se não colocar imagem própria, a miniatura do vídeo é usada automaticamente.
+        </small>
+      </div>
+
+      <div class="field">
+        <label for="f-audio">🎧 Áudio do produto (link do YouTube) <span style="color:var(--muted)">(opcional)</span></label>
+        <input type="url" id="f-audio" placeholder="https://www.youtube.com/watch?v=… ou https://youtu.be/…" aria-label="Link do áudio do produto no YouTube">
+        <small style="font-size:10px;margin-top:6px;display:block">
+          🎧 Cole aqui o link do vídeo (imagem + áudio narrado) publicado no YouTube. No site aparece um botão "Ouvir" separado do vídeo normal — pode preencher os dois campos ao mesmo tempo se quiser, ou só este.
+        </small>
+      </div>
+
+      <div class="field">
         <label>Imagem <span style="color:var(--danger-h)">*</span></label>
 
         <div class="img-option-tabs">
@@ -894,7 +910,7 @@ function andalaLogout(){ firebase.auth().signOut().then(function(){ window.locat
         </div>
 
         <div class="img-option-panel active" id="panel-img-link">
-          <input type="url" id="f-imagem" placeholder="https://i.ibb.co/…" oninput="previewUrl(this.value)" aria-label="URL da imagem" required>
+          <input type="url" id="f-imagem" placeholder="https://i.ibb.co/…" oninput="previewUrl(this.value)" aria-label="URL da imagem">
           <img id="url-preview" alt="pré-visualização da imagem">
           <small style="font-size:10px;margin-top:6px;display:block">
             📌 Recomendado: <strong style="color:var(--text)">imgbb.com</strong> → faz upload → copia o link direto → cola aqui.
@@ -1366,10 +1382,19 @@ function renderizar() {
     return;
   }
 
+  function extrairYoutubeIdAdmin(url) {
+    if (!url) return null;
+    const m = String(url).match(/(?:youtube\.com\/watch\?v=|youtube\.com\/embed\/|youtube\.com\/shorts\/|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+    return m ? m[1] : null;
+  }
+
   lista.innerHTML = arr.slice().reverse().map(p => {
+    const ytThumb = extrairYoutubeIdAdmin(p.video) || extrairYoutubeIdAdmin(p.audio);
     const thumb = p.imagem
       ? `<img class="card-thumb" src="${escHtml(p.imagem)}" alt="" loading="lazy" onerror="this.style.display='none'">`
-      : `<div class="card-thumb-placeholder">📦</div>`;
+      : ytThumb
+        ? `<img class="card-thumb" src="https://img.youtube.com/vi/${ytThumb}/hqdefault.jpg" alt="" loading="lazy" onerror="this.style.display='none'">`
+        : `<div class="card-thumb-placeholder">📦</div>`;
 
     const catBadge = p.categoria ? `<span class="badge">${escHtml(p.categoria)}</span>` : '';
     const preco    = p.preco ? `<span class="badge">${escHtml(p.preco)}</span>` : '';
@@ -1391,6 +1416,8 @@ function renderizar() {
         <div class="card-text">${escHtml(p.corpo || '')}</div>
         ${p.autor ? `<div class="card-editor">✍️ ${escHtml(p.autor)}</div>` : ''}
         ${p.avaliacao ? `<span class="badge" style="border-color:var(--gold);">⭐ ${p.avaliacao}</span>` : ''}
+        ${p.video ? '<span class="badge" title="Tem vídeo anexado">🎬 vídeo</span>' : ''}
+        ${p.audio ? '<span class="badge" style="border-color:var(--accent);color:var(--accent)" title="Tem áudio anexado">🎧 áudio</span>' : ''}
       </div>
       <div class="product-actions">
         <button class="btn-edit" onclick="editarProduto(${p.ts})">Editar</button>
@@ -1608,6 +1635,8 @@ function editarProduto(ts) {
   document.getElementById('f-link_afiliado').value = p.link_afiliado || '';
   document.getElementById('f-plataforma').value    = p.plataforma || '';
   document.getElementById('f-autor').value         = p.autor     || 'Redação AETHER';
+  document.getElementById('f-video').value         = p.video     || '';
+  document.getElementById('f-audio').value         = p.audio     || '';
 
   const tempVal = p.temperatura || 'fresca';
   const tempRadio = document.querySelector(`input[name="temp"][value="${tempVal}"]`);
@@ -1664,6 +1693,8 @@ function cancelarEdicao() {
   document.getElementById('f-link_afiliado').value = '';
   document.getElementById('f-plataforma').value = '';
   document.getElementById('f-autor').value = 'Redação AETHER';
+  document.getElementById('f-video').value = '';
+  document.getElementById('f-audio').value = '';
   const checked = document.querySelector('input[name="temp"]:checked');
   if (checked) checked.checked = false;
   document.querySelector('input[name="temp"][value="fresca"]').checked = true;
@@ -1682,6 +1713,8 @@ async function publicar() {
   const link_afiliado = document.getElementById('f-link_afiliado').value.trim();
   const plataforma    = document.getElementById('f-plataforma').value;
   const autor         = document.getElementById('f-autor').value || 'Redação AETHER';
+  const video         = document.getElementById('f-video').value.trim();
+  const audio         = document.getElementById('f-audio').value.trim();
   const temperatura   = document.querySelector('input[name="temp"]:checked')?.value || 'fresca';
 
   const imagem = opcaoImagemAtiva === 'galeria'
@@ -1692,7 +1725,7 @@ async function publicar() {
   if (!titulo)            { alert('Preencha o título.'); return; }
   if (!categoria)         { alert('Selecione a categoria.'); return; }
   if (!link_afiliado)     { alert('Preencha o link de afiliado.'); return; }
-  if (!imagem)            { alert('Adicione uma imagem (URL ou upload).'); return; }
+  if (!imagem && !video && !audio) { alert('Adicione uma imagem (URL ou upload) ou um link de vídeo/áudio do YouTube — a miniatura será usada automaticamente.'); return; }
 
   // Se for upload e a imagem for muito grande, avisar
   if (opcaoImagemAtiva === 'galeria' && imagem) {
@@ -1714,7 +1747,7 @@ async function publicar() {
 
     const dados = {
       titulo, subtitulo, corpo, categoria, pais, preco, avaliacao,
-      link_afiliado, plataforma, temperatura, autor,
+      link_afiliado, plataforma, temperatura, autor, video, audio,
       imagem: imagem || produto.imagem
     };
 
@@ -1733,7 +1766,7 @@ async function publicar() {
   } else {
     const novo = {
       titulo, subtitulo, corpo, categoria, pais, preco, avaliacao,
-      link_afiliado, plataforma, temperatura, autor,
+      link_afiliado, plataforma, temperatura, autor, video, audio,
       imagem, ts: Date.now()
     };
     const fbKey = await criarRemoto(novo);
