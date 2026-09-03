@@ -1398,7 +1398,11 @@ function renderizar() {
 
     const catBadge = p.categoria ? `<span class="badge">${escHtml(p.categoria)}</span>` : '';
     const preco    = p.preco ? `<span class="badge">${escHtml(p.preco)}</span>` : '';
-    const linkDireto = `${SITE_URL}?produto=${p.ts}`;
+    // Link "cru" (abre o produto direto no site) e link de compartilhamento
+    // (passa pelo /api/share, que gera a prévia com imagem/título/texto do
+    // próprio produto para o WhatsApp, Facebook, Instagram etc.)
+    const linkDireto  = `${SITE_URL}?produto=${p.ts}`;
+    const linkShare   = `${SITE_URL}api/share?produto=${p.ts}`;
 
     return `
     <div class="product-card">
@@ -1423,9 +1427,9 @@ function renderizar() {
         <button class="btn-edit" onclick="editarProduto(${p.ts})">Editar</button>
         <button class="btn-delete" onclick="apagar(${p.ts})">Apagar</button>
         <div class="share-row">
-          <button class="btn-share fb" data-rede="facebook" data-link="${linkDireto}" data-titulo="${escHtml(p.titulo || '')}" title="Compartilhar no Facebook">📘</button>
-          <button class="btn-share ig" data-rede="instagram" data-link="${linkDireto}" data-titulo="${escHtml(p.titulo || '')}" title="Compartilhar no Instagram">📷</button>
-          <button class="btn-share wa" data-rede="whatsapp" data-link="${linkDireto}" data-titulo="${escHtml(p.titulo || '')}" title="Compartilhar no WhatsApp">💬</button>
+          <button class="btn-share fb" data-rede="facebook" data-link="${linkShare}" data-titulo="${escHtml(p.titulo || '')}" title="Compartilhar no Facebook">📘</button>
+          <button class="btn-share ig" data-rede="instagram" data-link="${linkShare}" data-titulo="${escHtml(p.titulo || '')}" title="Compartilhar no Instagram">📷</button>
+          <button class="btn-share wa" data-rede="whatsapp" data-link="${linkShare}" data-titulo="${escHtml(p.titulo || '')}" title="Compartilhar no WhatsApp">💬</button>
         </div>
         <a class="site-link" href="${linkDireto}" target="_blank" rel="noopener">🔗 Ver no site</a>
       </div>
