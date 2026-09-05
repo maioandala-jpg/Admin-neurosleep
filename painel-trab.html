@@ -2096,11 +2096,11 @@ function compartilhar(rede, url, titulo) {
     const msg = linkValido ? `${texto}\n${url}` : texto;
     window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
   } else if (rede === 'facebook') {
-    if (linkValido) {
-      window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank', 'noopener,width=600,height=520');
-    } else {
-      copiarParaCompartilhar(texto, 'https://www.facebook.com/');
-    }
+    // O card automático do sharer.php às vezes se perde na hora de publicar
+    // (comportamento instável do Facebook mobile). Para garantir que o link
+    // sempre vá junto, copiamos texto+link e deixamos a pessoa colar —
+    // igual já fazemos com o Instagram.
+    copiarParaCompartilhar(linkValido ? `${texto}\n${url}` : texto, 'https://www.facebook.com/');
   } else if (rede === 'instagram') {
     // Instagram não tem intent web de compartilhamento de link — copia o texto/link
     // e abre o Instagram para colar (Stories, bio ou DM).
