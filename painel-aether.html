@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
-<title>AETHER — Painel</title>
+<title>AETHER by Andala — Painel</title>
 <link href="https://fonts.googleapis.com/css2?family=Lora:wght@600;700&family=Nunito+Sans:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#F4F7F5;--card:#fff;--ink:#1D2B2A;--muted:#5C6E6B;--line:#DCE6E2;--brand:#14594F;--cta:#E8A33D;--danger:#B3382C;font-family:'Nunito Sans',system-ui,sans-serif}
@@ -50,7 +50,7 @@ textarea{min-height:110px;resize:vertical}
 <div id="lock" style="position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:99">A verificar acesso…</div>
 
 <div class="wrap">
-  <div class="top"><h1>AETHER · Painel</h1><div><a href="index.html" target="_blank">Ver loja</a><button class="link" id="sair">Sair</button></div></div>
+  <div class="top"><h1>AETHER by Andala · Painel</h1><div><a href="index.html" target="_blank">Ver loja</a><button class="link" id="sair">Sair</button></div></div>
 
   <div class="box">
     <h2 id="formTitle">Novo produto</h2>
@@ -82,6 +82,15 @@ textarea{min-height:110px;resize:vertical}
       <button class="btn ghost" id="shLink" style="margin-top:0">Partilhar</button>
     </div>
     <a class="open" id="abrirLoja" target="_blank" rel="noopener">Abrir na loja para conferir</a>
+  </div>
+
+  <div class="box">
+    <h2>Links por categoria</h2>
+    <p class="hint">Um link para cada canal. Quem vier do teu vídeo cai logo nos ebooks certos.</p>
+    <div class="item"><div class="t"><b>Bíblico</b><small>Para o canal bíblico</small></div><button class="link" data-c="biblico">Copiar link</button></div>
+    <div class="item"><div class="t"><b>Mentalidade</b><small>Para o canal de mentalidade</small></div><button class="link" data-c="mentalidade">Copiar link</button></div>
+    <div class="item"><div class="t"><b>Romance e inglês</b><small>Para o canal de romance e inglês</small></div><button class="link" data-c="romance">Copiar link</button></div>
+    <div class="item"><div class="t"><b>Loja inteira</b><small>Todos os ebooks</small></div><button class="link" data-c="">Copiar link</button></div>
   </div>
 
   <div class="box">
@@ -166,6 +175,10 @@ async function copiar(t){
   catch(e){ const i=$('#linkOut'); i.value=t; i.select(); document.execCommand('copy'); }
   aviso('Link copiado');
 }
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-c]'); if(!b) return;
+  copiar(b.dataset.c ? `${LOJA.split('?')[0]}?cat=${b.dataset.c}` : LOJA.split('?')[0]);
+});
 $('#cpLink').onclick = () => copiar(linkAtual);
 $('#linkOut').onclick = e => e.target.select();
 $('#shLink').onclick = async () => {
