@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#0E433B">
+<title>AETHER by Andala — Painel</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@600;700&family=Nunito+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#F1F5F3;--card:#fff;--ink:#1D2B2A;--muted:#5C6E6B;--line:#DCE6E2;--brand:#14594F;--brand-d:#0E433B;--cta:#E8A33D;--danger:#B3382C;--ok:#1FA855;
+  --biblico:#3F4C8C;--mentalidade:#14594F;--romance:#B5486B;font-family:'Nunito Sans',system-ui,sans-serif}
+@media (prefers-color-scheme:dark){:root{--bg:#0F1A18;--card:#172623;--ink:#EAF2EF;--muted:#9DB3AE;--line:#27403B;--brand:#4FB3A2;--danger:#F08A7E;--biblico:#8E9CEB;--romance:#E58AA8}}
+*{box-sizing:border-box;margin:0}
+body{background:var(--bg);color:var(--ink);line-height:1.5}
+h1,h2,h3{font-family:'Lora',serif;line-height:1.2}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--cta);outline-offset:2px}
+.top{background:linear-gradient(165deg,#0B3A33,#14594F);color:#fff;padding-top:env(safe-area-inset-top,0px)}
+.top .in{max-width:1080px;margin:0 auto;padding:0 18px;height:62px;display:flex;align-items:center;justify-content:space-between}
+.top h1{font-size:20px}.top h1 small{font-family:'Nunito Sans',sans-serif;font-weight:600;font-size:13px;opacity:.75;margin-left:6px}
+.top nav{display:flex;gap:10px}
+.top nav a,.top nav button{color:#fff;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);padding:8px 14px;border-radius:999px;font-weight:700;font-size:14px;text-decoration:none}
+.wrap{max-width:1080px;margin:0 auto;padding:22px 18px 70px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:22px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;border-top:4px solid var(--c,var(--brand))}
+.stat b{display:block;font-family:'Lora',serif;font-size:28px}
+.stat span{font-size:13px;color:var(--muted);font-weight:600}
+.cols{display:grid;grid-template-columns:1fr 330px;gap:20px;align-items:start;margin-bottom:22px}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px}
+.panel h2{font-size:21px}
+.ph{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:6px}
+.sub{color:var(--muted);font-size:14px;margin-bottom:10px}
+label{display:block;font-weight:700;font-size:14px;margin:16px 0 6px}
+label small{font-weight:400;color:var(--muted)}
+input,select,textarea{width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--bg)}
+input:focus,select:focus,textarea:focus{border-color:var(--brand);outline:none;box-shadow:0 0 0 3px color-mix(in srgb,var(--brand) 22%,transparent)}
+textarea{min-height:120px;resize:vertical}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.price{position:relative}.price input{padding-right:52px}
+.price::after{content:"MT";position:absolute;right:14px;top:50%;transform:translateY(-50%);font-weight:700;color:var(--muted);pointer-events:none}
+.hint{font-size:13px;color:var(--muted);margin-top:5px}
+.err{border-color:var(--danger)!important}
+.imgbox{display:flex;gap:14px;align-items:center;background:var(--bg);border:1px dashed var(--line);border-radius:14px;padding:12px}
+.thumb{width:72px;height:96px;border-radius:10px;background:var(--line) center/cover no-repeat;flex:none}
+.imgbox .b{display:flex;flex-direction:column;gap:8px;flex:1;min-width:0}
+.btn{border:0;border-radius:12px;padding:13px 18px;font-weight:700;font-size:15px;background:var(--cta);color:#2B1B00}
+.btn:hover{filter:brightness(.95)}
+.btn.big{width:100%;margin-top:22px;padding:16px;font-size:17px}
+.btn.line{background:transparent;border:1px solid var(--line);color:var(--ink)}
+.btn.sm{padding:9px 14px;font-size:14px}
+.btn:disabled{opacity:.6;cursor:wait}
+.edit{background:color-mix(in srgb,var(--cta) 18%,var(--card));border:1px solid var(--cta);border-radius:12px;padding:12px 14px;margin:12px 0;display:flex;justify-content:space-between;gap:10px;align-items:center;font-size:14px}
+.edit[hidden]{display:none}
+.mode{font-size:12px;font-weight:700;padding:5px 11px;border-radius:999px;background:var(--bg);color:var(--muted);border:1px solid var(--line)}
+.mode.on{background:var(--cta);color:#2B1B00;border-color:var(--cta)}
+/* pré-visualização */
+.prev{position:sticky;top:14px}
+.prev h3{font-size:17px;margin-bottom:4px}
+.pcard{border:1px solid var(--line);border-radius:16px;overflow:hidden;background:var(--card);margin-top:12px}
+.pcover{aspect-ratio:3/4;background:var(--c,var(--brand)) center/cover no-repeat;display:flex;align-items:flex-end;padding:14px;color:#fff;font-family:'Lora',serif;font-weight:600;font-size:19px}
+.pinfo{padding:12px 14px 14px;display:flex;flex-direction:column;gap:3px}
+.pinfo .t{font-size:13px;font-weight:700;color:var(--c,var(--brand))}
+.pinfo h4{font-family:'Lora',serif;font-size:17px}
+.pinfo .by{font-size:13px;color:var(--muted);font-weight:600}
+.pinfo p{font-size:14px;color:var(--muted)}
+.pinfo .pr{font-weight:700;font-size:18px;color:var(--brand);margin-top:4px}
+/* lista */
+.lh{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+.lh input{max-width:260px;border-radius:999px}
+.item{display:flex;gap:14px;align-items:center;padding:14px 0;border-top:1px solid var(--line);flex-wrap:wrap}
+.item:first-of-type{border-top:0}
+.item .th{width:54px;height:72px;border-radius:10px;background:var(--c,var(--brand)) center/cover no-repeat;flex:none}
+.item .mid{flex:1;min-width:160px}
+.item .mid b{display:block;font-family:'Lora',serif;font-size:16px}
+.meta{display:flex;gap:10px;align-items:center;margin-top:4px;flex-wrap:wrap}
+.chip{font-size:12px;font-weight:700;padding:3px 10px;border-radius:999px;color:#fff;background:var(--c,var(--brand))}
+.chip.old{background:var(--danger)}
+.meta .pr{font-weight:700}
+.acts{display:flex;gap:8px;flex-wrap:wrap}
+.acts button,.acts a{padding:8px 13px;border-radius:10px;border:1px solid var(--line);background:var(--card);font-weight:700;font-size:13.5px;text-decoration:none;color:var(--ink)}
+.acts .ed{background:var(--brand);border-color:var(--brand);color:#fff}
+.acts .del{color:var(--danger)}
+.empty{text-align:center;color:var(--muted);padding:34px 10px}
+details.panel summary{cursor:pointer;font-weight:700;font-family:'Lora',serif;font-size:18px}
+.lk{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 0;border-top:1px solid var(--line)}
+.lk:first-of-type{margin-top:12px}
+/* modal e aviso */
+dialog{border:0;border-radius:20px;padding:26px;width:min(480px,92vw);background:var(--card);color:var(--ink)}
+dialog::backdrop{background:rgba(10,25,22,.6)}
+dialog h2{font-size:24px;margin-bottom:6px}
+.ok-i{width:54px;height:54px;border-radius:50%;background:var(--ok);color:#fff;display:grid;place-items:center;font-size:28px;margin-bottom:12px}
+#toast{position:fixed;left:50%;bottom:calc(22px + env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);background:var(--ink);color:var(--bg);padding:13px 20px;border-radius:999px;font-weight:700;font-size:14px;opacity:0;pointer-events:none;transition:.25s;z-index:200;max-width:92vw;text-align:center}
+#toast.on{opacity:1;transform:translate(-50%,0)}
+#lock{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:999;color:var(--muted)}
+@media(max-width:860px){.cols{grid-template-columns:1fr}.prev{position:static}.stats{grid-template-columns:repeat(2,1fr)}.top h1 small{display:none}}
+@media(max-width:560px){.row{grid-template-columns:1fr}.panel{padding:18px}.acts{width:100%}.acts button,.acts a{flex:1;text-align:center}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<div id="lock">A verificar acesso…</div>
+
+<header class="top"><div class="in">
+  <h1>AETHER <small>by Andala · Painel</small></h1>
+  <nav><a href="index.html" target="_blank" rel="noopener">Ver loja</a><button id="sair">Sair</button></nav>
+</div></header>
+
+<main class="wrap">
+  <section class="stats" id="stats"></section>
+
+  <section class="cols">
+    <div class="panel">
+      <div class="ph"><h2 id="formTitle">Novo produto</h2><span class="mode" id="modo">Novo</span></div>
+      <p class="sub">Preenche os campos e vê à direita como o ebook vai aparecer na loja.</p>
+      <div class="edit" id="editBar" hidden><span>A editar: <b id="editNome"></b></span><button class="btn line sm" id="cancelar" type="button">Cancelar</button></div>
+
+      <label for="titulo">Título</label>
+      <input id="titulo" maxlength="70" placeholder="Ex: Mente de Vencedor" autocomplete="off">
+      <label for="subtitulo">Frase curta <small>(aparece por baixo do título)</small></label>
+      <input id="subtitulo" maxlength="90" placeholder="Ex: 7 hábitos simples para começar hoje" autocomplete="off">
+      <label for="corpo">Descrição <small>(o que a pessoa vai aprender ou sentir)</small></label>
+      <textarea id="corpo" placeholder="Escreve de forma simples e direta."></textarea>
+
+      <div class="row">
+        <div><label for="categoria">Categoria</label>
+          <select id="categoria"><option value="">Escolher…</option><option value="BÍBLICO">Bíblico</option><option value="MENTALIDADE">Mentalidade</option><option value="ROMANCE & INGLÊS">Romance e inglês</option></select></div>
+        <div><label for="preco">Preço</label><div class="price"><input id="preco" inputmode="decimal" placeholder="50" autocomplete="off"></div>
+          <div class="hint">Escreve só o número. O MT entra sozinho.</div></div>
+      </div>
+
+      <label>Capa do ebook</label>
+      <div class="imgbox">
+        <div class="thumb" id="thumb"></div>
+        <div class="b">
+          <button class="btn line sm" type="button" id="escolher">Escolher imagem do telemóvel</button>
+          <input type="file" id="ficheiro" accept="image/*" hidden>
+          <input id="imagem" placeholder="ou cola o link / nome do ficheiro da capa" autocomplete="off">
+          <button class="btn line sm" type="button" id="tirar" hidden>Remover imagem</button>
+        </div>
+      </div>
+      <div class="hint">Melhor formato: vertical (3 por 4), como a capa de um livro.</div>
+
+      <button class="btn big" id="salvar" type="button">Publicar produto</button>
+    </div>
+
+    <aside class="panel prev">
+      <h3>Pré-visualização</h3>
+      <div class="hint">Assim aparece na loja.</div>
+      <div class="pcard" id="pv"></div>
+    </aside>
+  </section>
+
+  <section class="panel" style="margin-bottom:22px">
+    <div class="lh"><h2>Os teus produtos (<span id="n">0</span>)</h2><input id="busca" type="search" placeholder="Procurar produto" aria-label="Procurar produto"></div>
+    <div id="lista"><div class="empty">A carregar…</div></div>
+  </section>
+
+  <details class="panel">
+    <summary>Links por categoria</summary>
+    <p class="sub" style="margin-top:8px">Um link para cada canal. Quem vier do teu vídeo cai logo nos ebooks certos.</p>
+    <div class="lk"><b>Bíblico</b><button class="btn line sm" data-c="biblico">Copiar link</button></div>
+    <div class="lk"><b>Mentalidade</b><button class="btn line sm" data-c="mentalidade">Copiar link</button></div>
+    <div class="lk"><b>Romance e inglês</b><button class="btn line sm" data-c="romance">Copiar link</button></div>
+    <div class="lk"><b>Loja inteira</b><button class="btn line sm" data-c="">Copiar link</button></div>
+  </details>
+</main>
+
+<dialog id="ok">
+  <div class="ok-i">✓</div>
+  <h2 id="okTit">Produto publicado</h2>
+  <p class="sub">Este é o link do ebook. Cola-o no vídeo, no grupo ou no status.</p>
+  <input id="linkOut" readonly aria-label="Link do produto">
+  <div class="row" style="margin-top:14px">
+    <button class="btn" id="cpLink">Copiar link</button>
+    <button class="btn line" id="shLink">Partilhar</button>
+  </div>
+  <div class="row" style="margin-top:10px">
+    <a class="btn line" id="abrirLoja" target="_blank" rel="noopener" style="text-align:center;text-decoration:none">Ver na loja</a>
+    <button class="btn line" id="fechar">Concluir</button>
+  </div>
+</dialog>
+<div id="toast" role="status"></div>
+
+<script>
+/* acesso — igual ao painel anterior */
+firebase.initializeApp({
+  apiKey:'AIzaSyBGz09UMg2Grh0JfqJw0R_b6CXmZddS074',authDomain:'neurosleep-a43d0.firebaseapp.com',
+  databaseURL:'https://neurosleep-a43d0-default-rtdb.firebaseio.com',projectId:'neurosleep-a43d0',
+  messagingSenderId:'549312489447',appId:'1:549312489447:web:1428fbef235792197aff42'});
+firebase.auth().onAuthStateChanged(u => { if(u) document.getElementById('lock').remove(); else location.href='andala.html'; });
+document.getElementById('sair').onclick = () => firebase.auth().signOut().then(() => location.href='andala.html');
+
+/* Endereço da loja. Se a loja estiver noutro endereço, escreve-o aqui, por exemplo 'https://aether-weld.vercel.app/' */
+const LOJA = new URL('index.html', location.href).href.split('?')[0];
+const linkDe = ts => `${LOJA}?p=${ts}`;
+const DB = 'https://aether-2585d-default-rtdb.firebaseio.com/produtos';
+const CATS = {'BÍBLICO':{l:'Bíblico',c:'var(--biblico)'},'MENTALIDADE':{l:'Mentalidade',c:'var(--mentalidade)'},'ROMANCE & INGLÊS':{l:'Romance e inglês',c:'var(--romance)'}};
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let itens = [], editando = null, editTs = null, imagem = '', linkAtual = '';
+
+/* preço com MT automático */
+function num(v){ let x = String(v ?? '').replace(/[^\d,.]/g,''); if(/^\d{1,3}(\.\d{3})+$/.test(x)) x = x.replace(/\./g,''); return parseFloat(x.replace(',','.')); }
+function mt(v){
+  const t = String(v ?? '').trim(); if(!t) return '';
+  if(/^[\d\s.,]+$/.test(t)){ const n = num(t); if(!isNaN(n)) return n.toLocaleString('pt-PT',{maximumFractionDigits:2}) + ' MT'; }
+  return t;
+}
+function aviso(t){ const e=$('#toast'); e.textContent=t; e.classList.add('on'); clearTimeout(aviso.t); aviso.t=setTimeout(()=>e.classList.remove('on'),2400); }
+
+/* pré-visualização */
+function url(v){ return v ? `url("${String(v).replace(/"/g,'%22')}")` : 'none'; }
+function pre(){
+  const c = CATS[$('#categoria').value] || {l:'Categoria',c:'var(--brand)'};
+  const t = $('#titulo').value.trim() || 'Título do ebook';
+  $('#pv').style.setProperty('--c', c.c);
+  $('#pv').innerHTML = `<div class="pcover" style="${imagem ? `background-image:${url(imagem)}` : ''}">${imagem ? '' : esc(t)}</div>
+    <div class="pinfo"><span class="t">${c.l}</span><h4>${esc(t)}</h4><span class="by">Por Andala</span>
+    <p>${esc($('#subtitulo').value.trim() || 'A tua frase curta aparece aqui')}</p><div class="pr">${esc(mt($('#preco').value) || '0 MT')}</div></div>`;
+  $('#thumb').style.backgroundImage = imagem ? url(imagem) : 'none';
+  $('#tirar').hidden = !imagem;
+}
+['titulo','subtitulo','categoria','preco','corpo'].forEach(i => $('#'+i).addEventListener('input', pre));
+$('#imagem').addEventListener('input', e => { imagem = e.target.value.trim(); pre(); });
+$('#tirar').onclick = () => { imagem = ''; $('#imagem').value = ''; $('#ficheiro').value = ''; pre(); };
+
+/* imagem do telemóvel, reduzida para ficar leve */
+$('#escolher').onclick = () => $('#ficheiro').click();
+$('#ficheiro').addEventListener('change', e => {
+  const f = e.target.files[0]; if(!f) return;
+  const rd = new FileReader();
+  rd.onload = () => { const im = new Image(); im.onload = () => {
+    const m = 900, k = Math.min(1, m / Math.max(im.width, im.height));
+    const cv = document.createElement('canvas'); cv.width = Math.round(im.width * k); cv.height = Math.round(im.height * k);
+    cv.getContext('2d').drawImage(im, 0, 0, cv.width, cv.height);
+    imagem = cv.toDataURL('image/jpeg', .82); $('#imagem').value = ''; pre();
+    aviso(`Imagem pronta (${Math.round(imagem.length * .75 / 1024)} KB)`);
+  }; im.onerror = () => aviso('Não foi possível ler esta imagem.'); im.src = rd.result; };
+  rd.readAsDataURL(f);
+});
+
+/* dados */
+async function carregar(){
+  try{
+    const d = await (await fetch(DB + '.json')).json();
+    itens = d ? Object.entries(d).filter(([k,p]) => p && p.titulo).map(([k,p]) => ({...p,_k:k})).sort((a,b) => b.ts - a.ts) : [];
+  }catch(e){ aviso('Sem ligação. Tenta de novo.'); }
+  desenhar();
+}
+function desenhar(){
+  const q = $('#busca').value.trim().toLowerCase();
+  const v = itens.filter(p => CATS[p.categoria]);
+  $('#stats').innerHTML = `<div class="stat"><b>${itens.length}</b><span>Produtos</span></div>` +
+    Object.entries(CATS).map(([k,c]) => `<div class="stat" style="--c:${c.c}"><b>${v.filter(p=>p.categoria===k).length}</b><span>${c.l}</span></div>`).join('');
+  $('#n').textContent = itens.length;
+  const lista = itens.filter(p => !q || (p.titulo + ' ' + (p.subtitulo||'')).toLowerCase().includes(q));
+  $('#lista').innerHTML = lista.length ? lista.map(p => { const i = itens.indexOf(p), c = CATS[p.categoria];
+    return `<div class="item" style="--c:${c ? c.c : 'var(--muted)'}">
+      <div class="th" style="${p.imagem ? `background-image:${url(p.imagem)}` : ''}"></div>
+      <div class="mid"><b>${esc(p.titulo)}</b><div class="meta">${c ? `<span class="chip">${c.l}</span>` : '<span class="chip old">Categoria antiga: não aparece na loja</span>'}<span class="pr">${esc(mt(p.preco))}</span></div></div>
+      <div class="acts"><button class="ed" data-e="${i}">Editar</button><button data-l="${i}">Link</button><a href="${linkDe(p.ts)}" target="_blank" rel="noopener">Ver</a><button class="del" data-d="${i}">Apagar</button></div></div>`; }).join('')
+    : `<div class="empty">${itens.length ? 'Nenhum produto com esse nome.' : 'Ainda não tens produtos. Preenche o formulário acima e publica o primeiro.'}</div>`;
+}
+$('#busca').addEventListener('input', desenhar);
+
+function limpar(){
+  ['titulo','subtitulo','corpo','categoria','preco','imagem'].forEach(c => $('#'+c).value = '');
+  imagem = ''; editando = null; editTs = null; $('#ficheiro').value = '';
+  $('#formTitle').textContent = 'Novo produto'; $('#salvar').textContent = 'Publicar produto';
+  $('#modo').textContent = 'Novo'; $('#modo').classList.remove('on'); $('#editBar').hidden = true;
+  document.querySelectorAll('.err').forEach(e => e.classList.remove('err')); pre();
+}
+$('#cancelar').onclick = limpar;
+
+$('#salvar').onclick = async () => {
+  const d = {titulo:$('#titulo').value.trim(), subtitulo:$('#subtitulo').value.trim(), corpo:$('#corpo').value.trim(),
+    categoria:$('#categoria').value, preco:mt($('#preco').value), imagem};
+  let falta = null;
+  [['titulo','Escreve o título.'],['categoria','Escolhe a categoria.'],['preco','Escreve o preço.']].forEach(([c,m]) => {
+    const el = $('#'+c), vazio = !el.value.trim(); el.classList.toggle('err', vazio); if(vazio && !falta){ falta = m; el.focus(); } });
+  if(falta){ aviso(falta); return; }
+  if(imagem.startsWith('data:') && imagem.length * .75 > 900 * 1024 && !confirm('A imagem é pesada e pode falhar. Tentar mesmo assim?')) return;
+  const b = $('#salvar'); b.disabled = true; const txt = b.textContent; b.textContent = 'A guardar…';
+  try{
+    const ts = editando ? editTs : Date.now();
+    const r = editando
+      ? await fetch(`${DB}/${editando}.json`, {method:'PATCH', body:JSON.stringify(d)})
+      : await fetch(DB + '.json', {method:'POST', body:JSON.stringify({...d, ts})});
+    if(!r.ok) throw 0;
+    const foiEdicao = !!editando;
+    limpar(); await carregar(); mostrarLink(ts, foiEdicao ? 'Alterações guardadas' : 'Produto publicado');
+  }catch(e){ aviso('Não foi possível guardar. Verifica a internet e tenta de novo.'); b.textContent = txt; }
+  b.disabled = false;
+};
+
+/* link e partilha */
+function mostrarLink(ts, tit){
+  linkAtual = linkDe(ts); $('#okTit').textContent = tit || 'Link do produto';
+  $('#linkOut').value = linkAtual; $('#abrirLoja').href = linkAtual; $('#ok').showModal();
+}
+async function copiar(t){
+  try{ await navigator.clipboard.writeText(t); }
+  catch(e){ const i = $('#linkOut'); i.value = t; i.select(); document.execCommand('copy'); }
+  aviso('Link copiado');
+}
+$('#cpLink').onclick = () => copiar(linkAtual);
+$('#linkOut').onclick = e => e.target.select();
+$('#fechar').onclick = () => $('#ok').close();
+$('#shLink').onclick = async () => {
+  if(navigator.share){ try{ await navigator.share({title:'AETHER by Andala', text:'Vê este ebook:', url:linkAtual}); return; }catch(e){ if(e.name==='AbortError') return; } }
+  copiar(linkAtual);
+};
+
+document.addEventListener('click', async e => {
+  const b = e.target.closest('button'); if(!b) return;
+  if(b.dataset.c !== undefined && b.closest('details')){ copiar(b.dataset.c ? `${LOJA}?cat=${b.dataset.c}` : LOJA); return; }
+  if(b.dataset.l !== undefined){ mostrarLink(itens[b.dataset.l].ts); return; }
+  if(b.dataset.e !== undefined){
+    const p = itens[b.dataset.e];
+    $('#titulo').value = p.titulo || ''; $('#subtitulo').value = p.subtitulo || ''; $('#corpo').value = p.corpo || '';
+    $('#categoria').value = CATS[p.categoria] ? p.categoria : ''; $('#preco').value = p.preco || '';
+    imagem = p.imagem || ''; $('#imagem').value = imagem.startsWith('data:') ? '' : imagem;
+    editando = p._k; editTs = p.ts;
+    $('#formTitle').textContent = 'Editar produto'; $('#salvar').textContent = 'Guardar alterações';
+    $('#modo').textContent = 'A editar'; $('#modo').classList.add('on');
+    $('#editNome').textContent = p.titulo; $('#editBar').hidden = false;
+    if(!CATS[p.categoria]) aviso('Escolhe uma das 3 categorias novas para este produto aparecer na loja.');
+    pre(); scrollTo({top:0,behavior:'smooth'});
+  }
+  if(b.dataset.d !== undefined && confirm(`Apagar "${itens[b.dataset.d].titulo}"? Esta ação não pode ser desfeita.`)){
+    const r = await fetch(`${DB}/${itens[b.dataset.d]._k}.json`, {method:'DELETE'});
+    aviso(r.ok ? 'Produto apagado' : 'Não foi possível apagar'); carregar();
+  }
+});
+pre(); carregar();
+</script>
+</body>
+</html>
